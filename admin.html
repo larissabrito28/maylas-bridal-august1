@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Maylas Bridal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #07111f; 
+            color: #f7f2eb; 
+            font-family: 'Poppins', sans-serif; 
+            padding: 40px;
+            cursor: auto !important; /* ← CORREÇÃO DO CURSOR */
+        }
+        /* Desabilitar cursor personalizado */
+        .cursor, .cursor-blur {
+            display: none !important;
+        }
+
+        .admin-panel { max-width: 1200px; margin: 0 auto; }
+        .admin-panel h2 { font-family: 'Cinzel', serif; color: #e4d2b3; text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .admin-card { background: #0d1a2e; border-radius: 20px; padding: 30px; border: 1px solid rgba(216,194,154,0.2); }
+        .admin-card h3 { color: #e4d2b3; font-family: 'Cinzel', serif; margin-bottom: 15px; }
+        .admin-card button { background: linear-gradient(135deg, #d8c29a, #ead9b7); color: #07111f; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .admin-card button:hover { transform: scale(1.02); }
+        .admin-card p { font-size: 2rem; color: #e4d2b3; }
+        .admin-card .pedido-item { background: #091424; padding: 10px; border-radius: 10px; margin: 8px 0; border-left: 3px solid #d8c29a; }
+        .admin-card .pedido-item span { color: #9fe6a0; }
+        .estoque-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(216,194,154,0.1); }
+        .estoque-item input { width: 60px; padding: 5px; border-radius: 8px; border: none; text-align: center; }
+        .sair-admin { display: block; text-align: center; margin-top: 40px; }
+        .sair-admin button { background: #541b1b; color: #fff; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .voltar { display: inline-block; margin-top: 20px; color: #d8c29a; text-decoration: none; }
+        .voltar:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="admin-panel">
+    <h2>Painel Administrativo ✦</h2>
+
+    <div class="admin-grid">
+
+        <!-- PEDIDOS -->
+        <div class="admin-card">
+            <h3>📦 Pedidos</h3>
+            <p id="totalPedidos">0</p>
+            <button onclick="carregarPedidosAdmin()">Carregar Pedidos</button>
+            <div id="listaPedidosAdmin" style="max-height: 400px; overflow-y: auto; margin-top: 15px;"></div>
+        </div>
+
+        <!-- ESTOQUE -->
+        <div class="admin-card">
+            <h3>👗 Estoque</h3>
+            <div id="estoqueAdmin"></div>
+            <button onclick="salvarEstoqueAdmin()">Salvar Estoque</button>
+        </div>
+
+        <!-- CLIENTES -->
+        <div class="admin-card">
+            <h3>👩 Clientes</h3>
+            <p id="totalClientes">0</p>
+            <button onclick="carregarClientes()">Carregar Clientes</button>
+            <div id="listaClientes" style="max-height: 400px; overflow-y: auto; margin-top: 15px;"></div>
+        </div>
+
+    </div>
+
+    <div class="sair-admin">
+        <a href="index.html" class="voltar">← Voltar para a loja</a>
+        <br><br>
+        <button onclick="sairAdmin()">Sair da conta</button>
+    </div>
+</div>
+
+<script type="module">
+// ============================================================
+// ADMIN - IMPORTAÇÕES
+// ============================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+// ============================================================
+// CONFIGURAÇÕES (USE AS MESMAS DO SEU SITE)
+// ============================================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB9V0_Ovvh691bL24sttcZ4cWwZqWAxjPQ",
+    authDomain: "maylas-final.firebaseapp.com",
+    projectId: "maylas-final",
+    storageBucket: "maylas-final.firebasestorage.app",
+    messagingSenderId: "852263514737",
+    appId: "1:852263514737:web:16dd4b9f77638189fb61d0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ============================================================
+
+const ADMIN_EMAIL = "larissald021@gmail.com";
+
+// ============================================================
+// VERIFICAR LOGIN - SÓ ADMINISTRADOR
+// ============================================================
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        alert("Você precisa estar logado para acessar o painel.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    if (user.email !== ADMIN_EMAIL) {
+        alert("Acesso negado. Você não é administrador.");
+        signOut(auth);
+        window.location.href = "index.html";
+        return;
+    }
+
+    document.querySelector(".admin-panel").style.display = "block";
+    carregarEstoqueAdmin();
+});
+
+// ============================================================
+// FUNÇÕES ADMIN
+// ============================================================
+
+// Carregar pedidos
+window.carregarPedidosAdmin = async function() {
+    const area = document.getElementById("listaPedidosAdmin");
+    const total = document.getElementById("totalPedidos");
+
+    try {
+        const snapshot = await getDocs(collection(db, "pedidos"));
+        let html = "";
+        let count = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            count++;
+            html += `<div class="pedido-item">
+                <strong>ID:</strong> ${doc.id}<br>
+                <strong>Cliente:</strong> ${data.usuario || "Anônimo"}<br>
+                <strong>Itens:</strong> ${data.itens.map(i => i.nome).join(", ")}<br>
+                <strong>Total:</strong> R$ ${data.total.toLocaleString("pt-BR")}<br>
+                <strong>Status:</strong> <span>${data.status || "Pendente"}</span>
+            </div>`;
+        });
+
+        area.innerHTML = html || "<p>Nenhum pedido encontrado.</p>";
+        total.textContent = count;
+
+    } catch (error) {
+        console.error("Erro:", error);
+        area.innerHTML = "<p>Erro ao carregar pedidos.</p>";
+    }
+}
+
+// Carregar estoque
+let estoqueAtual = {};
+
+async function carregarEstoqueAdmin() {
+    const area = document.getElementById("estoqueAdmin");
+
+    try {
+        const docRef = doc(db, "admin", "estoque");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            estoqueAtual = docSnap.data();
+        } else {
+            // Estoque padrão
+            estoqueAtual = {
+                "New Moon": 5,
+                "Ariel Lace": 3,
+                "Aurora Lace": 4,
+                "Celestia": 2,
+                "Queen Garden": 3,
+                "Princess Bride": 5,
+                "Angel Bride": 4,
+                "Midnight Pearl": 2
+            };
+        }
+
+        let html = "";
+        for (const [nome, qtd] of Object.entries(estoqueAtual)) {
+            html += `<div class="estoque-item">
+                <span>${nome}</span>
+                <input type="number" id="estoque-input-${nome}" value="${qtd}" min="0">
+            </div>`;
+        }
+
+        area.innerHTML = html;
+
+    } catch (error) {
+        console.error("Erro:", error);
+        area.innerHTML = "<p>Erro ao carregar estoque.</p>";
+    }
+}
+
+window.salvarEstoqueAdmin = async function() {
+    try {
+        const novosDados = {};
+
+        for (const [nome] of Object.entries(estoqueAtual)) {
+            const input = document.getElementById(`estoque-input-${nome}`);
+            novosDados[nome] = parseInt(input.value) || 0;
+        }
+
+        await updateDoc(doc(db, "admin", "estoque"), novosDados);
+
+        alert("Estoque atualizado com sucesso!");
+        carregarEstoqueAdmin();
+
+    } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro ao salvar estoque.");
+    }
+}
+
+// Carregar clientes
+window.carregarClientes = async function() {
+    const area = document.getElementById("listaClientes");
+    const total = document.getElementById("totalClientes");
+
+    try {
+        const snapshot = await getDocs(collection(db, "pedidos"));
+        const clientes = new Set();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.usuario) clientes.add(data.usuario);
+        });
+
+        let html = "";
+        clientes.forEach(email => {
+            html += `<div class="pedido-item">${email}</div>`;
+        });
+
+        area.innerHTML = html || "<p>Nenhum cliente encontrado.</p>";
+        total.textContent = clientes.size;
+
+    } catch (error) {
+        console.error("Erro:", error);
+        area.innerHTML = "<p>Erro ao carregar clientes.</p>";
+    }
+}
+
+// Sair
+window.sairAdmin = function() {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
+    });
+}
+
+// Exibir painel após login
+document.querySelector(".admin-panel").style.display = "none";
+
+</script>
+
+</body>
+</html>
