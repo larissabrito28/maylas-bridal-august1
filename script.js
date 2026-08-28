@@ -17,6 +17,7 @@ import {
     signInAnonymously
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
+<<<<<<< HEAD
 import {
     getFirestore,
     collection,
@@ -29,6 +30,9 @@ import {
 // ============================================================
 // CONFIGURAÇÕES DO FIREBASE (SUBSTITUA PELOS SEUS DADOS)
 // ============================================================
+=======
+// CONFIG FIREBASE
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9V0_Ovvh691bL24sttcZ4cWwZqWAxjPQ",
@@ -115,6 +119,7 @@ const vestidosDetalhes = {
         categoria: "Noiva Celestial",
         preco: 4900,
         descricao: "Vestido etéreo inspirado na lua nova.",
+<<<<<<< HEAD
         imagens: ["imagens/vestido1.jpeg", "imagens/vestido1-1.jpeg"]
     },
     "Ariel Lace": {
@@ -158,6 +163,90 @@ const vestidosDetalhes = {
         preco: 4500,
         descricao: "Elegância misteriosa inspirada no brilho das pérolas.",
         imagens: ["imagens/vestido8.jpeg", "imagens/vestido8-8.jpeg"]
+=======
+        imagens: [
+            "imagens/vestido1.jpeg",
+            "imagens/vestido1-2.jpeg",
+            "imagens/vestido1-3.jpeg"
+        ]
+    },
+
+    "Ariel Lace": {
+        categoria: "Sereia da Lua",
+        preco: 3500,
+        descricao: "Silhueta sereia delicada e elegante.",
+        imagens: [
+            "imagens/vestido2.jpeg",
+            "imagens/vestido2-2.jpeg",
+            "imagens/vestido2-3.jpeg"
+        ]
+    },
+
+    "Aurora Lace": {
+        categoria: "Renda Vintage",
+        preco: 4500,
+        descricao: "Renda clássica com romantismo atemporal.",
+        imagens: [
+            "imagens/vestido3.jpeg",
+            "imagens/vestido3-2.jpeg",
+            "imagens/vestido3-3.jpeg"
+        ]
+    },
+
+    "Celestia": {
+        categoria: "Cisney Rendado",
+        preco: 3100,
+        descricao: "Leveza celestial e acabamento sofisticado.",
+        imagens: [
+            "imagens/vestido4.jpeg",
+            "imagens/vestido4-2.jpeg",
+            "imagens/vestido4-3.jpeg"
+        ]
+    },
+
+    "Queen Garden": {
+        categoria: "Luxo fatal",
+        preco: 5800,
+        descricao: "Inspirado em jardins reais e romantismo dramático.",
+        imagens: [
+            "imagens/vestido5.jpeg",
+            "imagens/vestido5-2.jpeg",
+            "imagens/vestido5-3.jpeg"
+        ]
+    },
+
+    "Princess Bride": {
+        categoria: "Romântico Clássico",
+        preco: 4700,
+        descricao: "Modelo princesa delicado e elegante.",
+        imagens: [
+            "imagens/vestido6.jpeg",
+            "imagens/vestido6-2.jpeg",
+            "imagens/vestido6-3.jpeg"
+        ]
+    },
+
+    "Angel Bride": {
+        categoria: "Anjo floral",
+        preco: 4000,
+        descricao: "Vestido angelical com delicadeza floral.",
+        imagens: [
+            "imagens/vestido7.jpeg",
+            "imagens/vestido7-2.jpeg",
+            "imagens/vestido7-3.jpeg"
+        ]
+    },
+
+    "Midnight Pearl": {
+        categoria: "Noiva Mística",
+        preco: 4500,
+        descricao: "Elegância misteriosa inspirada na meia-noite.",
+        imagens: [
+            "imagens/vestido8.jpeg",
+            "imagens/vestido8-2.jpeg",
+            "imagens/vestido8-3.jpeg"
+        ]
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     }
 };
 
@@ -165,11 +254,19 @@ const vestidosDetalhes = {
 // SALVAR PEDIDO NO FIRESTORE
 // ============================================================
 
+<<<<<<< HEAD
 async function salvarPedidoNoFirestore(pedido, totalFinal, freteValor) {
     if (!usuarioAtual) {
         mostrarToast("Faça login para salvar seu pedido ✦", "erro");
         return null;
     }
+=======
+onAuthStateChanged(auth, (user) => {
+
+    if(user){
+
+        usuarioAtual = user.email;
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 
     try {
         const docRef = await addDoc(collection(db, "pedidos"), {
@@ -181,6 +278,7 @@ async function salvarPedidoNoFirestore(pedido, totalFinal, freteValor) {
             data: new Date().toISOString()
         });
 
+<<<<<<< HEAD
         mostrarToast(`Pedido salvo com sucesso ✦`, "carrinho");
         return docRef.id;
     } catch (error) {
@@ -322,39 +420,162 @@ function atualizarEstoque() {
                 }
             }
         });
+=======
+        document.getElementById("perfilEmail").innerHTML =
+        "Cliente conectada: " + usuarioAtual;
+
+        carregarCarrinho();
+        carregarFavoritos();
+        carregarPedidos();
+
+    }else{
+
+        usuarioAtual = null;
+        carrinho = [];
+        favoritos = [];
+        pedidos = [];
+        total = 0;
+
+        atualizarCarrinho();
+        atualizarFavoritos();
+        atualizarPedidos();
+
+        document.getElementById("mensagemLogin").innerHTML =
+        "Nenhuma conta conectada.";
+
+        document.getElementById("perfilEmail").innerHTML =
+        "Entre na sua conta para ver seu perfil.";
+    }
+
+});
+
+window.cadastro = function(){
+
+    let email = document.getElementById("email").value.trim();
+    let senha = document.getElementById("senha").value.trim();
+
+    createUserWithEmailAndPassword(auth, email, senha)
+
+    .then(() => {
+        document.getElementById("mensagemLogin").innerHTML =
+        "Conta criada com sucesso ✦";
+    })
+
+    .catch((error) => {
+        document.getElementById("mensagemLogin").innerHTML =
+        "Erro: " + error.code;
     });
+
+}
+
+window.login = function(){
+
+    let email = document.getElementById("email").value.trim();
+    let senha = document.getElementById("senha").value.trim();
+
+    signInWithEmailAndPassword(auth, email, senha)
+
+    .then(() => {
+        document.getElementById("mensagemLogin").innerHTML =
+        "Conta conectada ✦";
+    })
+
+    .catch((error) => {
+        document.getElementById("mensagemLogin").innerHTML =
+        "Erro: " + error.code;
+    });
+
+}
+
+window.sair = function(){
+
+    signOut(auth).then(() => {
+
+        usuarioAtual = null;
+        carrinho = [];
+        favoritos = [];
+        pedidos = [];
+        total = 0;
+
+        atualizarCarrinho();
+        atualizarFavoritos();
+        atualizarPedidos();
+
+        document.getElementById("mensagemLogin").innerHTML =
+        "Você saiu da conta ✦";
+
+        document.getElementById("perfilEmail").innerHTML =
+        "Entre na sua conta para ver seu perfil.";
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
+    });
+
 }
 
 // ============================================================
 // CARRINHO
 // ============================================================
 
+<<<<<<< HEAD
 window.adicionarCarrinho = function(nome, preco) {
     if (estoque[nome] <= 0) {
         mostrarToast("Este vestido está esgotado ✦", "erro");
         return;
     }
+=======
+window.adicionarCarrinho = function(nome, preco){
+
+    carrinho.push({
+        nome: nome,
+        preco: preco
+    });
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 
     carrinho.push({ nome: nome, preco: preco });
     total += preco;
     estoque[nome]--;
 
     atualizarCarrinho();
+<<<<<<< HEAD
     atualizarEstoque();
     mostrarToast(`✦ ${nome} foi adicionado ao carrinho!`, "carrinho");
 }
 
 function atualizarCarrinho() {
+=======
+    salvarCarrinho();
+
+}
+
+function atualizarCarrinho(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     const lista = document.getElementById("listaCarrinho");
     const totalTexto = document.getElementById("total");
 
     lista.innerHTML = "";
+<<<<<<< HEAD
     carrinho.forEach(item => {
         let li = document.createElement("li");
         li.innerHTML = `${item.nome} ✦ R$ ${item.preco.toLocaleString("pt-BR")}`;
+=======
+
+    carrinho.forEach((item, index) => {
+
+        let li = document.createElement("li");
+
+        li.innerHTML =
+        `${item.nome} ✦ R$ ${item.preco.toLocaleString("pt-BR")}
+        <button onclick="removerCarrinho(${index})" class="remover-btn">
+            Remover
+        </button>`;
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
         lista.appendChild(li);
+
     });
 
+<<<<<<< HEAD
     totalTexto.innerHTML = `Total: R$ ${total.toLocaleString("pt-BR")}`;
 }
 
@@ -367,31 +588,156 @@ window.esvaziarCarrinho = function() {
     atualizarEstoque();
     document.getElementById("resultadoFrete").innerHTML = "";
     mostrarToast("Carrinho esvaziado ✦", "erro");
+=======
+    totalTexto.innerHTML =
+    `Total: R$ ${total.toLocaleString("pt-BR")}`;
+
+}
+
+window.removerCarrinho = function(index){
+
+    total -= carrinho[index].preco;
+
+    carrinho.splice(index, 1);
+
+    atualizarCarrinho();
+    salvarCarrinho();
+
+}
+
+window.esvaziarCarrinho = function(){
+
+    carrinho = [];
+    total = 0;
+
+    atualizarCarrinho();
+    salvarCarrinho();
+
+    alert("Carrinho esvaziado ✦");
+
+}
+
+function salvarCarrinho(){
+
+    if(usuarioAtual){
+
+        localStorage.setItem(
+            "carrinho_" + usuarioAtual,
+            JSON.stringify(carrinho)
+        );
+
+    }
+
+}
+
+function carregarCarrinho(){
+
+    let dados = localStorage.getItem("carrinho_" + usuarioAtual);
+
+    if(dados){
+
+        carrinho = JSON.parse(dados);
+
+        total = carrinho.reduce((soma, item) => {
+            return soma + item.preco;
+        }, 0);
+
+        atualizarCarrinho();
+
+    }
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 }
 
 // ============================================================
 // FAVORITOS
 // ============================================================
 
+<<<<<<< HEAD
 window.favoritar = function(nome) {
     if (favoritos.includes(nome)) {
         mostrarToast(`✦ ${nome} já está nos seus favoritos!`, "favorito");
         return;
+=======
+window.favoritar = function(nome){
+
+    if(!favoritos.includes(nome)){
+        favoritos.push(nome);
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     }
 
     favoritos.push(nome);
     atualizarFavoritos();
+<<<<<<< HEAD
     mostrarToast(`✦ ${nome} foi adicionado aos favoritos!`, "favorito");
 }
 
 function atualizarFavoritos() {
+=======
+
+}
+
+function atualizarFavoritos(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     const area = document.getElementById("listaFavoritos");
     area.innerHTML = "";
+<<<<<<< HEAD
     favoritos.forEach(item => {
         let li = document.createElement("li");
         li.innerHTML = item + " ✦";
+=======
+
+    favoritos.forEach((item, index) => {
+
+        let li = document.createElement("li");
+
+        li.innerHTML =
+        `${item} ✦
+        <button onclick="removerFavorito(${index})" class="remover-btn">
+            Remover
+        </button>`;
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
         area.appendChild(li);
+
     });
+
+}
+
+window.removerFavorito = function(index){
+
+    favoritos.splice(index, 1);
+
+    atualizarFavoritos();
+    salvarFavoritos();
+
+}
+
+function salvarFavoritos(){
+
+    if(usuarioAtual){
+
+        localStorage.setItem(
+            "favoritos_" + usuarioAtual,
+            JSON.stringify(favoritos)
+        );
+
+    }
+
+}
+
+function carregarFavoritos(){
+
+    let dados = localStorage.getItem("favoritos_" + usuarioAtual);
+
+    if(dados){
+
+        favoritos = JSON.parse(dados);
+        atualizarFavoritos();
+
+    }
+
 }
 
 window.compartilharDesejos = function() {
@@ -409,20 +755,57 @@ window.compartilharDesejos = function() {
 // PEDIDOS
 // ============================================================
 
+<<<<<<< HEAD
 function atualizarPedidos() {
+=======
+function salvarPedidos(){
+
+    if(usuarioAtual){
+
+        localStorage.setItem(
+            "pedidos_" + usuarioAtual,
+            JSON.stringify(pedidos)
+        );
+
+    }
+
+}
+
+function carregarPedidos(){
+
+    let dados = localStorage.getItem("pedidos_" + usuarioAtual);
+
+    if(dados){
+
+        pedidos = JSON.parse(dados);
+        atualizarPedidos();
+
+    }
+
+}
+
+function atualizarPedidos(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     const area = document.getElementById("listaPedidos");
     area.innerHTML = "";
     pedidos.forEach(item => {
+
         let li = document.createElement("li");
+
         li.innerHTML = item;
+
         area.appendChild(li);
+
     });
+
 }
 
 // ============================================================
 // FRETE
 // ============================================================
 
+<<<<<<< HEAD
 window.calcularFrete = function() {
     let cep = document.getElementById("cep").value.trim();
 
@@ -451,7 +834,15 @@ window.calcularFrete = function() {
 window.finalizarPedido = function() {
     if (carrinho.length === 0) {
         mostrarToast("Seu pedido está vazio ✦", "erro");
+=======
+window.finalizarPedido = function(){
+
+    if(carrinho.length === 0){
+
+        alert("Seu pedido está vazio ✦");
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
         return;
+
     }
 
     const area = document.getElementById("checkoutLista");
@@ -460,9 +851,11 @@ window.finalizarPedido = function() {
 
     area.innerHTML = "";
     carrinho.forEach(item => {
+
         let p = document.createElement("p");
         p.innerHTML = `✦ ${item.nome} — R$ ${item.preco.toLocaleString("pt-BR")}`;
         area.appendChild(p);
+
     });
 
     let totalFinal = total + frete;
@@ -470,23 +863,73 @@ window.finalizarPedido = function() {
     freteArea.innerHTML = `Frete: R$ ${frete.toLocaleString("pt-BR")} | Total final: R$ ${totalFinal.toLocaleString("pt-BR")}`;
 
     document.getElementById("checkoutModal").style.display = "flex";
+
 }
 
+<<<<<<< HEAD
 window.fecharCheckout = function() {
+=======
+window.fecharCheckout = function(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     document.getElementById("checkoutModal").style.display = "none";
+
 }
 
+<<<<<<< HEAD
 window.copiarPix = function() {
     let chave = document.getElementById("chavePix").innerText;
     navigator.clipboard.writeText(chave).then(() => {
         mostrarToast("Chave Pix copiada ✦", "carrinho");
     });
+=======
+window.confirmarCheckout = function(){
+
+    let nome = document.getElementById("nomeCliente").value.trim();
+
+    let mensagem =
+    "Olá! Vim pelo Maylas Bridal e gostaria de finalizar meu pedido:%0A%0A";
+
+    carrinho.forEach(item => {
+
+        mensagem +=
+        `• ${item.nome} - R$ ${item.preco.toLocaleString("pt-BR")}%0A`;
+
+    });
+
+    mensagem +=
+    `%0ATotal: R$ ${total.toLocaleString("pt-BR")}`;
+
+    if(nome !== ""){
+        mensagem += `%0ACliente: ${nome}`;
+    }
+
+    if(usuarioAtual){
+        mensagem += `%0AConta: ${usuarioAtual}`;
+    }
+
+    pedidos.push(
+        `Pedido ✦ Total: R$ ${total.toLocaleString("pt-BR")}`
+    );
+
+    salvarPedidos();
+    atualizarPedidos();
+
+    window.open(
+        `https://wa.me/5511987595486?text=${mensagem}`,
+        "_blank"
+    );
+
+    fecharCheckout();
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 }
 
 window.confirmarCheckout = async function() {
     let nome = document.getElementById("nomeCliente").value.trim();
     let totalFinal = total + frete;
 
+<<<<<<< HEAD
     // Salvar no Firestore
     const pedidoId = await salvarPedidoNoFirestore(carrinho, totalFinal, frete);
 
@@ -524,6 +967,10 @@ window.confirmarCheckout = async function() {
 // ============================================================
 
 window.abrirDetalhes = function(nome) {
+=======
+window.abrirDetalhes = function(nome){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     vestidoModalAtual = nome;
     const vestido = vestidosDetalhes[nome];
 
@@ -538,25 +985,40 @@ window.abrirDetalhes = function(nome) {
     const miniaturas = document.getElementById("miniaturas");
     miniaturas.innerHTML = "";
     vestido.imagens.forEach(imagem => {
+
         let img = document.createElement("img");
         img.src = imagem;
         img.onclick = function() {
             document.getElementById("modalImagem").src = imagem;
         };
         miniaturas.appendChild(img);
+
     });
 
     document.getElementById("modalVestido").style.display = "flex";
+
 }
 
+<<<<<<< HEAD
 window.fecharModal = function() {
+=======
+window.fecharModal = function(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     document.getElementById("modalVestido").style.display = "none";
+
 }
 
+<<<<<<< HEAD
 window.adicionarModalCarrinho = function() {
+=======
+window.adicionarModalCarrinho = function(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     const vestido = vestidosDetalhes[vestidoModalAtual];
     adicionarCarrinho(vestidoModalAtual, vestido.preco);
     fecharModal();
+
 }
 
 // ============================================================
@@ -564,13 +1026,31 @@ window.adicionarModalCarrinho = function() {
 // ============================================================
 
 const pesquisa = document.getElementById("pesquisa");
+<<<<<<< HEAD
 pesquisa.addEventListener("keyup", function() {
+=======
+
+pesquisa.addEventListener("keyup", function(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     let texto = pesquisa.value.toLowerCase();
     let cards = document.querySelectorAll(".card");
     cards.forEach(card => {
+
         let conteudo = card.innerText.toLowerCase();
+<<<<<<< HEAD
         card.style.display = conteudo.includes(texto) ? "block" : "none";
+=======
+
+        if(conteudo.includes(texto)){
+            card.style.display = "block";
+        }else{
+            card.style.display = "none";
+        }
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     });
+
 });
 
 // ============================================================
@@ -579,18 +1059,27 @@ pesquisa.addEventListener("keyup", function() {
 
 const elementosAnimados = document.querySelectorAll(".card, .faq-item, .login-box, .carrinho, .favoritos, .historico");
 
+<<<<<<< HEAD
 function animarElementos() {
+=======
+function animarElementos(){
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
     elementosAnimados.forEach(elemento => {
+
         const topo = elemento.getBoundingClientRect().top;
         const visivel = window.innerHeight - 80;
         if (topo < visivel) {
             elemento.classList.add("mostrar");
         }
+
     });
+
 }
 
 window.addEventListener("scroll", animarElementos);
 animarElementos();
+<<<<<<< HEAD
 atualizarEstoque();
 // ============================================================
 // ALTERNAR ENTRE MÉTODOS DE LOGIN
@@ -632,4 +1121,21 @@ window.mostrarMetodo = function(metodo) {
     document.getElementById('metodo' + metodo.charAt(0).toUpperCase() + metodo.slice(1)).style.display = 'block';
     document.getElementById('btn' + metodo.charAt(0).toUpperCase() + metodo.slice(1)).classList.add('ativo');
 }
+=======
+
+// LOADER
+
+window.addEventListener("load", () => {
+
+    setTimeout(() => {
+
+        const loader = document.getElementById("loader");
+
+        if(loader){
+            loader.classList.add("loader-hidden");
+        }
+
+    }, 1800);
+
+>>>>>>> 3d34dd7fc5fa28822509c3c6836ea2d9b4f9518d
 });
