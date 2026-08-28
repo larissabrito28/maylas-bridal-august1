@@ -26,7 +26,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 // ============================================================
-// CONFIGURAÇÕES
+// CONFIGURAÇÕES DO FIREBASE
 // ============================================================
 
 const firebaseConfig = {
@@ -43,10 +43,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ============================================================
-// ADMIN
+// ADMIN - E-MAIL DO ADMINISTRADOR
 // ============================================================
 
-const ADMIN_EMAIL = "seuemail@gmail.com"; // MUDE PARA SEU E-MAIL
+const ADMIN_EMAIL = "larissald021@gmail.com"; 
 
 // ============================================================
 // LOADER
@@ -59,7 +59,7 @@ window.addEventListener("load", () => {
 });
 
 // ============================================================
-// VARIÁVEIS
+// VARIÁVEIS GLOBAIS
 // ============================================================
 
 let carrinho = [];
@@ -71,7 +71,7 @@ let usuarioAtual = null;
 let vestidoModalAtual = null;
 
 // ============================================================
-// TOAST
+// TOAST (notificações)
 // ============================================================
 
 function mostrarToast(mensagem, tipo = "carrinho") {
@@ -166,8 +166,8 @@ const vestidosDetalhes = {
 // ============================================================
 
 async function salvarPedidoNoFirestore(pedido, totalFinal, freteValor) {
-    if (!usuarioAtual) {
-        mostrarToast("Faça login para salvar seu pedido ✦", "erro");
+    if (!usuarioAtual || usuarioAtual === "Anônimo") {
+        mostrarToast("Faça login com e-mail ou Google para salvar o pedido ✦", "erro");
         return null;
     }
 
@@ -265,14 +265,35 @@ window.loginAnonimo = function() {
 }
 
 // ============================================================
-// SAIR
+// SAIR (limpa campos)
 // ============================================================
 
 window.sair = function() {
     signOut(auth).then(() => {
+        // Limpa os campos de e-mail e senha
+        document.getElementById("email").value = "";
+        document.getElementById("senha").value = "";
+
         document.getElementById("mensagemLogin").innerHTML = "Você saiu da conta ✦";
         document.getElementById("perfilEmail").innerHTML = "Entre para ver seu perfil.";
         mostrarToast("Você saiu da conta ✦", "erro");
+
+        // Esconde links admin
+        const linkAdmin = document.getElementById("linkAdmin");
+        const linkAdminPerfil = document.getElementById("linkAdminPerfil");
+        if (linkAdmin) linkAdmin.style.display = "none";
+        if (linkAdminPerfil) linkAdminPerfil.style.display = "none";
+
+        // Limpa dados locais
+        carrinho = [];
+        favoritos = [];
+        pedidos = [];
+        total = 0;
+        frete = 0;
+        atualizarCarrinho();
+        atualizarFavoritos();
+        atualizarPedidos();
+        document.getElementById("resultadoFrete").innerHTML = "";
     });
 }
 
@@ -282,12 +303,18 @@ window.sair = function() {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        usuarioAtual = user.email || "Anônimo";
+        // Define usuarioAtual corretamente
+        if (user.isAnonymous) {
+            usuarioAtual = "Anônimo";
+        } else {
+            usuarioAtual = user.email || "Anônimo";
+        }
+
         document.getElementById("mensagemLogin").innerHTML = `Conta conectada: ${usuarioAtual} ✦`;
         document.getElementById("perfilEmail").innerHTML = `Cliente: ${usuarioAtual}`;
         mostrarToast(`Bem-vinda, ${usuarioAtual} ✦`, "carrinho");
 
-        // Admin
+        // Admin links
         const linkAdmin = document.getElementById("linkAdmin");
         const linkAdminPerfil = document.getElementById("linkAdminPerfil");
         if (user.email === ADMIN_EMAIL) {
@@ -400,17 +427,19 @@ function atualizarCarrinho() {
 }
 
 function salvarCarrinho() {
-    if (usuarioAtual) {
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
         localStorage.setItem("carrinho_" + usuarioAtual, JSON.stringify(carrinho));
     }
 }
 
 function carregarCarrinho() {
-    let dados = localStorage.getItem("carrinho_" + usuarioAtual);
-    if (dados) {
-        carrinho = JSON.parse(dados);
-        total = carrinho.reduce((soma, item) => soma + item.preco, 0);
-        atualizarCarrinho();
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
+        let dados = localStorage.getItem("carrinho_" + usuarioAtual);
+        if (dados) {
+            carrinho = JSON.parse(dados);
+            total = carrinho.reduce((soma, item) => soma + item.preco, 0);
+            atualizarCarrinho();
+        }
     }
 }
 
@@ -442,16 +471,18 @@ window.favoritar = function(nome) {
 }
 
 function salvarFavoritos() {
-    if (usuarioAtual) {
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
         localStorage.setItem("favoritos_" + usuarioAtual, JSON.stringify(favoritos));
     }
 }
 
 function carregarFavoritos() {
-    let dados = localStorage.getItem("favoritos_" + usuarioAtual);
-    if (dados) {
-        favoritos = JSON.parse(dados);
-        atualizarFavoritos();
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
+        let dados = localStorage.getItem("favoritos_" + usuarioAtual);
+        if (dados) {
+            favoritos = JSON.parse(dados);
+            atualizarFavoritos();
+        }
     }
 }
 
@@ -480,16 +511,18 @@ window.compartilharDesejos = function() {
 // ============================================================
 
 function salvarPedidos() {
-    if (usuarioAtual) {
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
         localStorage.setItem("pedidos_" + usuarioAtual, JSON.stringify(pedidos));
     }
 }
 
 function carregarPedidos() {
-    let dados = localStorage.getItem("pedidos_" + usuarioAtual);
-    if (dados) {
-        pedidos = JSON.parse(dados);
-        atualizarPedidos();
+    if (usuarioAtual && usuarioAtual !== "Anônimo") {
+        let dados = localStorage.getItem("pedidos_" + usuarioAtual);
+        if (dados) {
+            pedidos = JSON.parse(dados);
+            atualizarPedidos();
+        }
     }
 }
 
@@ -526,14 +559,22 @@ window.calcularFrete = function() {
 }
 
 // ============================================================
-// CHECKOUT
+// CHECKOUT (exige login não anônimo)
 // ============================================================
 
 window.finalizarPedido = function() {
+    // VERIFICA SE ESTÁ LOGADO COM CONTA REAL (NÃO ANÔNIMO)
+    if (!usuarioAtual || usuarioAtual === "Anônimo") {
+        mostrarToast("Faça login com e-mail ou Google para finalizar o pedido ✦", "erro");
+        document.getElementById("login").scrollIntoView({ behavior: "smooth" });
+        return;
+    }
+
     if (carrinho.length === 0) {
         mostrarToast("Seu pedido está vazio ✦", "erro");
         return;
     }
+
     const area = document.getElementById("checkoutLista");
     const totalArea = document.getElementById("checkoutTotal");
     const freteArea = document.getElementById("checkoutFrete");
@@ -564,6 +605,14 @@ window.copiarPix = function() {
 }
 
 window.confirmarCheckout = async function() {
+    // VERIFICA NOVAMENTE (segurança extra)
+    if (!usuarioAtual || usuarioAtual === "Anônimo") {
+        mostrarToast("Faça login com e-mail ou Google para finalizar o pedido ✦", "erro");
+        document.getElementById("login").scrollIntoView({ behavior: "smooth" });
+        fecharCheckout();
+        return;
+    }
+
     let nome = document.getElementById("nomeCliente").value.trim();
     let totalFinal = total + frete;
 
@@ -575,6 +624,7 @@ window.confirmarCheckout = async function() {
     }
 
     pedidos.push(`Pedido ${pedidoId} - R$ ${totalFinal.toLocaleString("pt-BR")}`);
+    salvarPedidos();
     atualizarPedidos();
 
     let mensagem = "Olá! Vim pelo Maylas Bridal:%0A%0A";
@@ -590,6 +640,7 @@ window.confirmarCheckout = async function() {
     total = 0;
     frete = 0;
     atualizarCarrinho();
+    salvarCarrinho();
     document.getElementById("resultadoFrete").innerHTML = "";
     fecharCheckout();
 
@@ -696,8 +747,8 @@ window.enviarAvaliacao = async function() {
         return;
     }
 
-    if (!usuarioAtual) {
-        msgArea.innerHTML = "Faça login para avaliar ✦";
+    if (!usuarioAtual || usuarioAtual === "Anônimo") {
+        msgArea.innerHTML = "Faça login com e-mail ou Google para avaliar ✦";
         msgArea.style.color = "#ff8f8f";
         return;
     }
@@ -748,7 +799,7 @@ animarElementos();
 atualizarEstoque();
 
 // ============================================================
-// CURSOR
+// CURSOR PREMIUM
 // ============================================================
 
 const cursor = document.querySelector(".cursor");
